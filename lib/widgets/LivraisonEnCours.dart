@@ -4,6 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livreur/widgets/ItemsList.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LivraisonEnCours extends StatefulWidget {
   @override
@@ -64,7 +65,7 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
               child: ElevatedButton(
                 child: Text("Voir le chemin sur google map"),
                 onPressed: () {
-
+                  openMap(-3.823216,-38.481700);
                 },
               ),
             )
@@ -86,5 +87,14 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
     );
   }
 
+  Future<void> openMap(double latitude, double longitude) async {
+    //String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    String googleUrl = 'https://www.google.com/maps/dir/?api=1&origin=Space+Needle+Seattle+WA&destination=Pike+Place+Market+Seattle+WA&travelmode=bicycling';
+    if (await canLaunch(googleUrl)) {
+      await launch(googleUrl);
+    } else {
+      throw 'Could not open the map.';
+    }
+  }
 
 }
