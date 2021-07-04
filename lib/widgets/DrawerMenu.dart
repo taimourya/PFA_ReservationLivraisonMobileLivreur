@@ -5,10 +5,19 @@ import 'package:livreur/widgets/Home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livreur/widgets/CommandeEnCours.dart';
+import 'package:livreur/widgets/Login.dart';
 import 'package:livreur/widgets/Reclamation.dart';
 import 'package:livreur/widgets/Settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DrawerMenu extends StatelessWidget {
+
+  Future<void> removeSharedUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('user_id');
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -19,7 +28,7 @@ class DrawerMenu extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.blue,
             ),
-            child: Text('Restaurant Application'),
+            child: Text('Livreur Application'),
           ),
           ListTile(
             leading: Icon(Icons.home),
@@ -58,6 +67,17 @@ class DrawerMenu extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => Settings()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Logout'),
+            onTap: () {
+              removeSharedUserId();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Login()),
               );
             },
           ),

@@ -4,7 +4,13 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:livreur/widgets/CommandeTrouver.dart';
 import 'package:livreur/widgets/DrawerMenu.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:livreur/API/Host.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class Home extends StatefulWidget {
 
@@ -20,9 +26,13 @@ class _HomeState extends State<Home> {
 
   Timer? timer;
 
+  late int userId;
+
+
   @override
   void initState() {
     super.initState();
+    getSharedUserId();
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) => checkCommande());
   }
   @override
@@ -31,9 +41,47 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
+  Future<void> getSharedUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final id = prefs.getInt('user_id');
+    print(id);
+    setState(() {
+      userId = id == null? 0 : id;
+    });
+  }
+
   void checkCommande() {
-      if(disponnible)
-        print("recherche ...");
+      if(disponnible) {
+        var url = Uri.parse("http://${Host.url}:8080/livraison/check?livreur_id=$userId");
+
+        http.get(url).then((response) {
+          print(response.body);
+          dynamic data = json.decode(response.body);
+          if(response.statusCode == 200) {
+            print("id liv : ${data['id']}");
+            setState(() {
+              disponnible = false;
+              timer?.cancel();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CommandeTrouver(data['id'])),
+              );
+            });
+          }
+          else {
+            if(data['message'] == "vous avez deja une livraison en cours")
+            {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(data['message'])));
+              setState(() {
+                disponnible = false;
+              });
+            }
+          }
+        }).catchError((err) {
+          print(err);
+        });
+      }
   }
   @override
   Widget build(BuildContext context) {

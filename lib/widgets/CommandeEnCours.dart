@@ -22,13 +22,13 @@ class _StateCommandeEnCours extends State<CommandeEnCours>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.green,
-            title: Text("Livraison en cours"),
-          ),
-          drawer: DrawerMenu(),
-          body:  LivraisonEnCours(),
-        );
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          title: Text("Livraison en cours"),
+        ),
+        drawer: DrawerMenu(),
+        body:  LivraisonEnCours(),
+    );
   }
 
 

@@ -3,8 +3,15 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:livreur/widgets/CommandeTerminer.dart';
+import 'package:livreur/widgets/Home.dart';
 import 'package:livreur/widgets/ItemsList.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:livreur/API/Host.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class LivraisonEnCours extends StatefulWidget {
   @override
@@ -17,6 +24,97 @@ class LivraisonEnCours extends StatefulWidget {
 class _StateLivraisonEnCours extends State<LivraisonEnCours>{
 
 
+  dynamic data;
+  dynamic dataItems;
+  Duration get loginTime => Duration(milliseconds: 100);
+  late int userId;
+
+  @override
+  void initState() {
+    super.initState();
+    getSharedUserId();
+    Future.delayed(loginTime).then((_) {
+      _getLivraison();
+      _getItemsLivraison();
+    });
+  }
+
+  Future<void> getSharedUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final id = prefs.getInt('user_id');
+    print(id);
+    setState(() {
+      userId = id == null? 0 : id;
+    });
+  }
+
+  void _getLivraison() {
+    var url = Uri.parse("http://${Host.url}:8080/livraison/enCours?livreur_id=$userId");
+
+    http.get(url).then((response) {
+      print(response.body);
+      if(response.statusCode == 200) {
+        setState(() {
+          data = json.decode(response.body);
+        });
+      }
+      else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Home()),
+          );
+      }
+    }).catchError((err) {
+      print(err);
+    });
+  }
+
+  void _getItemsLivraison() {
+    var url = Uri.parse("http://${Host.url}:8080/livraison/enCours/items?livreur_id=$userId");
+
+    http.get(url).then((response) {
+      print(response.body);
+      if(response.statusCode == 200) {
+        setState(() {
+          dataItems = json.decode(response.body);
+        });
+      }
+      else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+      }
+    }).catchError((err) {
+      print(err);
+    });
+  }
+
+  void _nextStep() {
+    var url = Uri.parse("http://${Host.url}:8080/livraison/nextStep?livreur_id=$userId");
+
+    http.get(url).then((response) {
+      print(response.body);
+      if(response.statusCode == 200) {
+        if(response.body == "livrer") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CommandeTerminer()),
+          );
+        }
+        else {
+          _getLivraison();
+        }
+      }
+      else {
+        data = json.decode(response.body);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("${data['message']}")));
+      }
+    }).catchError((err) {
+      print(err);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +132,18 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
         ),
         Card(
           child: ListTile(
-            title: Text('nom complet : ' + "taimourya" + " " + "yahya"),
+            leading: Text("nom complet"),
+            title: Text(
+              data != null? "${data['client']['firstname']} ${data['client']['firstname']}" : ''
+            ),
           ),
         ),
         Card(
           child: ListTile(
-            title: Text('téléphone : ' + "0643334135"),
+            leading: Text("Téléphone"),
+            title: Text(
+                data != null? "${data['client']['phone']}" : ''
+            ),
           ),
         ),
         SizedBox(height: 20,),
@@ -49,15 +153,27 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
         ),
         Card(
           child: ListTile(
-            title: Text('id : ' + "5698"),
+            leading: Text("id"),
+            title: Text(
+                data != null? "${data['id']}" : ''
+            ),
           ),
-        ),Card(
+        ),
+        Card(
           child: ListTile(
-            title: Text('Etat : ' + "En cours de recolte"),
+            leading: Text("Etat"),
+            title: Text(
+                data != null?
+                data['stat'] == 1? 'En cours de recolte' :
+                data['stat'] == 2? 'En route' :
+                data['stat'] == 3? 'Livré' : ''
+                    :
+                ''
+            ),
           ),
         ),
         Expanded(
-            child: ItemsList()
+            child: ItemsList(dataItems)
         ),
         Row(
           children: [
@@ -65,7 +181,7 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
               child: ElevatedButton(
                 child: Text("Voir le chemin sur google map"),
                 onPressed: () {
-                  openMap(-3.823216,-38.481700);
+                  openMap(data != null? data['latitude']: 0, data != null? data['longitude']: 0);
                 },
               ),
             )
@@ -75,9 +191,9 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
             children: [
               Expanded(
                 child: ElevatedButton(
-                  child: Text("Etat Suivante"),
+                  child: Text("Etape Suivante"),
                   onPressed: () {
-
+                    _nextStep();
                   },
                 ),
               )

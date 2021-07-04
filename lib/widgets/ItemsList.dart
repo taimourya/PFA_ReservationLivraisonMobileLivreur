@@ -9,6 +9,10 @@ import 'package:livreur/widgets/Item.dart';
 
 class ItemsList extends StatefulWidget {
 
+  dynamic data;
+
+  ItemsList(this.data);
+
   @override
   State<StatefulWidget> createState() {
     return StatItemList();
@@ -23,21 +27,21 @@ class StatItemList extends State<ItemsList> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: 3,
+        itemCount: widget.data != null? widget.data.length:0,
         itemBuilder: (context, index) {
           return Card(
             child: ListTile(
               leading: Icon(CupertinoIcons.map_fill),
-              title: Text('Item ${index}'),
+              title: Text("${widget.data[index]['buyable']['name']}"),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("${"35"} DH"),
+                  Text("${widget.data[index]['buyable']['price']} DH"),
                   SizedBox(width: 20,),
-                  Text("X${'1'}"),
+                  Text("X${widget.data[index]['qtn']}"),
                 ],
               ),
-              subtitle: Text("Par ${'MCDO'}"),
+              subtitle: Text("Par ${widget.data[index]['buyable']['restaurant']['name']}"),
 
             ),
           );
