@@ -54,13 +54,13 @@ class _LoginState extends State<Login> {
       },
       messages: LoginMessages(userHint: "Username"),
       theme: LoginTheme(primaryColor: Colors.green),
-      title: 'Restaurant',
+      title: 'Livreur',
       logo: 'assets/images/logo.png',
       onLogin: (data) {
 
         return Future.delayed(loginTime).then((_) {
           return http.post(
-            Uri.parse('http://${Host.url}:8080/user/login'),
+            Uri.parse('${Host.url}/user/login'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
             },

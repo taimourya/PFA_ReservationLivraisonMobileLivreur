@@ -40,7 +40,7 @@ class _ProfilState extends State<Profil> {
   }
 
   void _getProfil() {
-    var url = Uri.parse("http://${Host.url}:8080/user?id=$userId");
+    var url = Uri.parse("${Host.url}/user?id=$userId");
     http.get(url)
         .then((response) {
       print(response.body);

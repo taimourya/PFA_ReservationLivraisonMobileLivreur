@@ -41,7 +41,7 @@ class HistoriqueStat extends State<Historique> {
   }
 
   void _getHistorique() {
-    var url = Uri.parse("http://${Host.url}:8080/livraison/historique?livreur_id=$userId");
+    var url = Uri.parse("${Host.url}/livraison/historique?livreur_id=$userId");
     http.get(url).then((response) {
       print(response.body);
       setState(() {

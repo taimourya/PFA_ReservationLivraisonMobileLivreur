@@ -42,7 +42,7 @@ class StatReclamation extends State<Reclamation> {
 
   addReclamation() {
     http.post(
-      Uri.parse('http://${Host.url}:8080/create/reclamation'),
+      Uri.parse('${Host.url}/create/reclamation'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

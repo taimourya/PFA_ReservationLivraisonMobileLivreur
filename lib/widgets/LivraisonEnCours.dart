@@ -49,7 +49,7 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
   }
 
   void _getLivraison() {
-    var url = Uri.parse("http://${Host.url}:8080/livraison/enCours?livreur_id=$userId");
+    var url = Uri.parse("${Host.url}/livraison/enCours?livreur_id=$userId");
 
     http.get(url).then((response) {
       print(response.body);
@@ -70,7 +70,7 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
   }
 
   void _getItemsLivraison() {
-    var url = Uri.parse("http://${Host.url}:8080/livraison/enCours/items?livreur_id=$userId");
+    var url = Uri.parse("${Host.url}/livraison/enCours/items?livreur_id=$userId");
 
     http.get(url).then((response) {
       print(response.body);
@@ -84,14 +84,14 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
           context,
           MaterialPageRoute(builder: (context) => Home()),
         );
-      }
+    }
     }).catchError((err) {
       print(err);
     });
   }
 
   void _nextStep() {
-    var url = Uri.parse("http://${Host.url}:8080/livraison/nextStep?livreur_id=$userId");
+    var url = Uri.parse("${Host.url}/livraison/nextStep?livreur_id=$userId");
 
     http.get(url).then((response) {
       print(response.body);

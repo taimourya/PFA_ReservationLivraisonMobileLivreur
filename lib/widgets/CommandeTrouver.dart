@@ -45,7 +45,7 @@ class _CommandeTrouverState extends State<CommandeTrouver> {
 
   void _accepterLivraison() {
     var url = Uri.parse(
-        "http://${Host.url}:8080/livraison/accept"
+        "${Host.url}/livraison/accept"
             "?livreur_id=$userId"
             "&livraison_id=${widget.livraisonId}"
     );

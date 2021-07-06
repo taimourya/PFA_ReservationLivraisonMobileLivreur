@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:livreur/widgets/Chat.dart';
 import 'package:livreur/widgets/CommandeTrouver.dart';
 import 'package:livreur/widgets/DrawerMenu.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +26,7 @@ class _HomeState extends State<Home> {
   bool disponnible = false;
 
   Timer? timer;
+  Timer? timerConversation;
 
   late int userId;
 
@@ -34,10 +36,12 @@ class _HomeState extends State<Home> {
     super.initState();
     getSharedUserId();
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) => checkCommande());
+    timerConversation = Timer.periodic(Duration(seconds: 1), (Timer t) => checkConversation());
   }
   @override
   void dispose() {
     timer?.cancel();
+    timerConversation?.cancel();
     super.dispose();
   }
 
@@ -52,7 +56,7 @@ class _HomeState extends State<Home> {
 
   void checkCommande() {
       if(disponnible) {
-        var url = Uri.parse("http://${Host.url}:8080/livraison/check?livreur_id=$userId");
+        var url = Uri.parse("${Host.url}/livraison/check?livreur_id=$userId");
 
         http.get(url).then((response) {
           print(response.body);
@@ -61,7 +65,8 @@ class _HomeState extends State<Home> {
             print("id liv : ${data['id']}");
             setState(() {
               disponnible = false;
-              timer?.cancel();
+              timer!.cancel();
+              timerConversation!.cancel();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => CommandeTrouver(data['id'])),
@@ -83,6 +88,29 @@ class _HomeState extends State<Home> {
         });
       }
   }
+
+  void checkConversation() {
+    var url = Uri.parse("${Host.url}:8080/conversation/check?user_id=$userId");
+
+    http.get(url).then((response) {
+      print(response.body);
+      if(response.statusCode == 200) {
+        setState(() {
+          timer?.cancel();
+          timerConversation?.cancel();
+          disponnible = false;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Chat()),
+          );
+        });
+      }
+    }).catchError((err) {
+      print(err);
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
