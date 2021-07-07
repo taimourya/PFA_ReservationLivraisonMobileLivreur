@@ -2,5 +2,5 @@
 
 
 class Host {
-  static String url = "https://192.168.8.111:8080";
+  static String url = 'http://192.168.8.111:8080';
 }

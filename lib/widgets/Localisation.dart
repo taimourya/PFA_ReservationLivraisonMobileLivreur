@@ -6,11 +6,17 @@ import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:livreur/widgets/DrawerMenu.dart';
 
-
 class Localisation extends StatefulWidget {
+
+  LatLng destination;
+
+
+  Localisation(this.destination);
+
   @override
   State<StatefulWidget> createState() {
     return _StateLocalisation();
@@ -22,48 +28,62 @@ class _StateLocalisation extends State<Localisation>{
 
   late GoogleMapController mapController;
 
-  final LatLng _center = const LatLng(33.5761412, -7.5427257);
+  LatLng _center = LatLng(33.5761412, -7.5427257);
+
+  String googleAPiKey = "AIzaSyDOQEk6vtt_iOiHrID8gFMlwD-8hxeZYmo";
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentPosition();
+  }
+
 
   late Marker source = Marker(
       markerId: MarkerId('home'),
       position: LatLng(0, 0),
   );
 
+  late Marker destination = Marker(
+      markerId: MarkerId('destination'),
+      position: widget.destination,
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      infoWindow: InfoWindow(title: 'Destination')
+  );
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
 
 
+  Future<void> getCurrentPosition() async {
+
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+    .then((pos) {
+      setState(() {
+        source = Marker(
+            markerId: MarkerId('home'),
+            position: LatLng(pos.latitude, pos.latitude),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+            infoWindow: InfoWindow(title: 'Current Location')
+        );
+      });
+    });
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    print("source : ${source.position}");
     return Scaffold(
       appBar: AppBar(
-        title: Text('Localisez votre position'),
+        title: Text('Chemin vers la destination'),
         backgroundColor: Colors.green,
-        actions: [
-          TextButton(
-              child: Text("Envoyer", style: TextStyle(color: Colors.cyan, fontSize: 15),),
-              onPressed: () {
-                if(source.position.latitude != 0 || source.position.longitude != 0) {
-
-                }
-                else {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('choisisez une position')));
-                }
-              }
-          )
-        ],
       ),
       drawer: DrawerMenu(),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.location_searching),
-        onPressed: () {
-
-        },
-      ),
       body: GoogleMap(
-        markers: {source},
+        myLocationEnabled: true,
+        markers: {source, destination},
         onMapCreated: _onMapCreated,
         initialCameraPosition: CameraPosition(
             target: _center,
@@ -71,16 +91,13 @@ class _StateLocalisation extends State<Localisation>{
         ),
         onTap: (pos) {
           setState(() {
-            source = Marker(
-                markerId: MarkerId('home'),
-                position: pos,
-                icon: BitmapDescriptor.defaultMarker,
-                infoWindow: InfoWindow(title: 'Current Location')
-            );
+
           });
         },
       ),
     );
   }
+
+
 
 }

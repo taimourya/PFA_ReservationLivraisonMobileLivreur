@@ -3,9 +3,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:livreur/widgets/CommandeTerminer.dart';
 import 'package:livreur/widgets/Home.dart';
 import 'package:livreur/widgets/ItemsList.dart';
+import 'package:livreur/widgets/Localisation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -181,7 +183,12 @@ class _StateLivraisonEnCours extends State<LivraisonEnCours>{
               child: ElevatedButton(
                 child: Text("Voir le chemin sur google map"),
                 onPressed: () {
-                  openMap(data != null? data['latitude']: 0, data != null? data['longitude']: 0);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Localisation(
+                      LatLng(data != null? data['latitude']: 0, data != null? data['longitude']: 0)
+                    )),
+                  );
                 },
               ),
             )
